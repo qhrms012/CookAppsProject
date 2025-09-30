@@ -8,18 +8,18 @@ public class HexBoardSpawner : MonoBehaviour
 {
     [Header("Tilemap")]
     public Tilemap bgTilemap;           // 하트 모양으로 칠해둔 배경 타일맵
-    public Tilemap jackBoxTilemap;
+    
 
     [Header("Blocks")]
     public Block[] blockPrefabs;        // 블럭 프리팹(색상별)
 
-    [Header("JackBox")]
-    public GameObject jackBoxPrefab;
+    
+
+    private Dictionary<Vector2Int, Block> blockDict = new Dictionary<Vector2Int, Block>();
 
     void Start()
     {
         SpawnBlocks();
-        SpawnJackBoxesFromTile();
     }
 
     void SpawnBlocks()
@@ -42,34 +42,12 @@ public class HexBoardSpawner : MonoBehaviour
                     
                     Block prefab = blockPrefabs[Random.Range(0, blockPrefabs.Length)];
                     Block b = Instantiate(prefab, worldPos, Quaternion.identity);
+                    Vector2Int pos = new Vector2Int(x, y);
+                    b.Init(b.color, pos);
 
-                    // Block 스크립트에 GridPos 저장해두면 추후 매칭/드랍에 유용
-                    b.Init(b.color, new Vector2Int(x, y));
+                    blockDict[pos] = b;
                 }
             }
         }
-    }
-
-    void  SpawnJackBoxesFromTile()
-    {
-        BoundsInt bounds = jackBoxTilemap.cellBounds;
-
-        for(int x = bounds.xMin;x < bounds.xMax; x++)
-        {
-            for(int y = bounds.yMin;y < bounds.yMax; y++)
-            {
-                Vector3Int cellPos = new Vector3Int(x, y, 0);
-
-                if (jackBoxTilemap.HasTile(cellPos))
-                {
-
-                    Vector3 worldPos = jackBoxTilemap.GetCellCenterWorld(cellPos);
-
-                    Instantiate(jackBoxPrefab, worldPos, Quaternion.identity);
-                    jackBoxTilemap.SetTile(cellPos, null);
-
-                }
-            }
-        }
-    }
+    }    
 }
