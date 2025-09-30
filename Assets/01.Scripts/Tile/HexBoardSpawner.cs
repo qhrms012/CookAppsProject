@@ -15,7 +15,7 @@ public class HexBoardSpawner : MonoBehaviour
 
     
 
-    private Dictionary<Vector2Int, Block> blockDict = new Dictionary<Vector2Int, Block>();
+    public Dictionary<Vector2Int, Block> blockDict = new Dictionary<Vector2Int, Block>();
 
     void Start()
     {
