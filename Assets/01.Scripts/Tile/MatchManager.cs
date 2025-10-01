@@ -18,20 +18,34 @@ public class MatchManager : MonoBehaviour
         new Vector3Int(0, -1, 1)    // ↘
     };
 
-    void Update()
+    private void Start()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        StartCoroutine(AutoMatchLoop());
+    }
+
+    IEnumerator AutoMatchLoop()
+    {
+        while (true)
         {
+            // 매치 찾기
             var matches = FindMatches(spawner.blockDict);
 
             if (matches.Count > 0)
             {
                 Debug.Log($"Match found! {matches.Count} group(s)");
                 ClearMatches(matches, spawner.blockDict);
+
+                yield return new WaitForSeconds(0.3f);
+
+                
+                spawner.DropAndRefill();
+
+                // 리필 후 다시 매치 검사 (루프 계속)
             }
             else
             {
-                Debug.Log("No match");
+                // 매치가 없으면 → 한 프레임 대기 후 다시 검사
+                yield return null;
             }
         }
     }

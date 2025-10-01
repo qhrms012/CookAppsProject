@@ -10,6 +10,85 @@ public class Block : MonoBehaviour
     public ColorType color;           // Inspector에서 지정
     public Vector2Int gridPos;        // 보드 상 위치 (x,y)
 
+    private Vector3 dragOffset;
+    private Vector3 originalPos;
+    private Camera cam;
+
+    public HexBoardSpawner spawner;
+    private void OnEnable()
+    {
+        spawner = FindAnyObjectByType<HexBoardSpawner>();
+    }
+    private void Start()
+    {
+        cam = Camera.main;
+    }
+    private void OnMouseDown()
+    {
+        originalPos = transform.position;
+        Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0;
+        dragOffset = transform.position - mouseWorld;
+        Debug.Log("들어옴");
+    }
+
+    private void OnMouseDrag()
+    {
+        Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0;
+        transform.position = mouseWorld + dragOffset;
+    }
+
+    private void OnMouseUp()
+    {
+        Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0;
+        Vector3Int cell = spawner.bgTilemap.WorldToCell(mouseWorld);
+        Vector2Int dropPos = new Vector2Int(cell.x, cell.y);
+
+        if (dropPos != gridPos && spawner.blockDict.ContainsKey(dropPos))
+        {
+            Block other = spawner.blockDict[dropPos];
+            TrySwap(other);
+        }
+        else
+        {
+            StartCoroutine(MoveTo(originalPos, 0.2f)); // 제자리 복귀
+        }
+    }
+    private void TrySwap(Block other)
+    {
+        Vector2Int posA = this.gridPos;
+        Vector2Int posB = other.gridPos;
+
+        // 딕셔너리 키 교환
+        spawner.blockDict[posA] = other;
+        spawner.blockDict[posB] = this;
+
+        // 블럭 내부 좌표 교환
+        this.gridPos = posB;
+        other.gridPos = posA;
+
+        // 자리 바꾸기 연출
+        Vector3 worldA = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posA.x, posA.y, 0));
+        Vector3 worldB = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posB.x, posB.y, 0));
+        StartCoroutine(this.MoveTo(worldB, 0.2f));
+        StartCoroutine(other.MoveTo(worldA, 0.2f));
+
+        // 매치 검사
+        var matches = spawner.matchManager.FindMatches(spawner.blockDict);
+        if (matches.Count == 0)
+        {
+            // 매치 없으면 되돌리기
+            StartCoroutine(this.MoveTo(worldA, 0.2f));
+            StartCoroutine(other.MoveTo(worldB, 0.2f));
+            this.gridPos = posA;
+            other.gridPos = posB;
+            spawner.blockDict[posA] = this;
+            spawner.blockDict[posB] = other;
+        }
+    }
+
     // 초기화 함수
     public void Init(ColorType c, Vector2Int pos)
     {
@@ -17,4 +96,19 @@ public class Block : MonoBehaviour
         gridPos = pos;
         name = $"Block_{color}_{pos.x}_{pos.y}";
     }
+    public IEnumerator MoveTo(Vector3 targetPos, float duration = 0.25f)
+    {
+        Vector3 startPos = transform.position;
+        float t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duration;
+            transform.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
+
+        transform.position = targetPos; // 최종 위치
+    }
+
 }
