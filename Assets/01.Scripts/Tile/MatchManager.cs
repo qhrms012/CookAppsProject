@@ -8,7 +8,7 @@ public class MatchManager : MonoBehaviour
     public HexBoardSpawner spawner;
 
     // Cube 좌표 6방향 (직선)
-    private static readonly Vector3Int[] cubeDirs = new Vector3Int[]
+    public static readonly Vector3Int[] cubeDirs = new Vector3Int[]
     {
         new Vector3Int(1, -1, 0),   // →
         new Vector3Int(1, 0, -1),   // ↗
@@ -50,7 +50,7 @@ public class MatchManager : MonoBehaviour
         }
     }
 
-    Vector3Int OffsetToCube(Vector2Int offset)
+    public Vector3Int OffsetToCube(Vector2Int offset)
     {
         int col = offset.x;
         int row = offset.y;
@@ -62,7 +62,7 @@ public class MatchManager : MonoBehaviour
         return new Vector3Int(x, y, z);
     }
 
-    Vector2Int CubeToOffset(Vector3Int cube)
+    public Vector2Int CubeToOffset(Vector3Int cube)
     {
         int col = cube.x + (cube.z - (cube.z & 1)) / 2;
         int row = cube.z;
