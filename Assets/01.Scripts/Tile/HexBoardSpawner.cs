@@ -103,7 +103,7 @@ public class HexBoardSpawner : MonoBehaviour
         BoundsInt bounds = bgTilemap.cellBounds;
 
         // y 기준으로 위에서 아래로 탐색 (열 단위)
-        for (int y = bounds.xMin; y < bounds.yMax; y++)
+        for (int y = bounds.yMin; y < bounds.yMax; y++)
         {
             for (int x = bounds.xMin; x < bounds.xMax; x++)
             {
@@ -130,7 +130,23 @@ public class HexBoardSpawner : MonoBehaviour
 
                     // 위에서 아무것도 못 찾으면 새 블럭 생성
                     if (!blockDict.ContainsKey(pos))
-                        SpawnSingleBlock(pos);
+                    {
+                        // 보드의 오른쪽 바깥(xMax+1)에 임시 스폰
+                        Vector3Int spawnCell = new Vector3Int(bounds.xMax + 1, y, 0);
+                        Vector3 spawnWorld = bgTilemap.GetCellCenterWorld(spawnCell);
+
+                        Block prefab = blockPrefabs[Random.Range(0, blockPrefabs.Length)];
+                        Block newBlock = Instantiate(prefab, spawnWorld, Quaternion.identity);
+                        newBlock.Init(newBlock.color, pos);
+                        newBlock.spawner = this;
+
+                        blockDict[pos] = newBlock;
+
+                        // 최종 위치까지 애니메이션 이동
+                        Vector3 targetWorld = bgTilemap.GetCellCenterWorld(new Vector3Int(pos.x, pos.y, 0));
+                        StartCoroutine(newBlock.MoveTo(targetWorld, 0.25f));
+                    }
+
                 }
             }
         }

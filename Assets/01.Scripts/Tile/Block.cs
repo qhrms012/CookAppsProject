@@ -67,40 +67,49 @@ public class Block : MonoBehaviour
         Vector2Int posA = this.gridPos;
         Vector2Int posB = other.gridPos;
 
-        // 딕셔너리 갱신
+        // 딕셔너리 먼저 갱신 (위치 확정)
         spawner.blockDict[posA] = other;
         spawner.blockDict[posB] = this;
 
-        // 내부 좌표 갱신
         this.gridPos = posB;
         other.gridPos = posA;
 
-        // 위치 이동 애니메이션
+        // 자리 교환 연출
         Vector3 worldA = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posA.x, posA.y, 0));
         Vector3 worldB = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posB.x, posB.y, 0));
+        StartCoroutine(SwapAndCheck(this, other, worldA, worldB));
+    }
 
-        StartCoroutine(this.MoveTo(worldB, 0.2f));
-        StartCoroutine(other.MoveTo(worldA, 0.2f));
+    private IEnumerator SwapAndCheck(Block a, Block b, Vector3 worldA, Vector3 worldB)
+    {
+        // 애니메이션 완료 대기
+        yield return a.StartCoroutine(a.MoveTo(worldB, 0.2f));
+        yield return b.StartCoroutine(b.MoveTo(worldA, 0.2f));
 
-        // 매치 검사
         var matches = spawner.matchManager.FindMatches(spawner.blockDict);
+
         if (matches.Count == 0)
         {
-            // 매치 없으면 되돌리기
-            StartCoroutine(this.MoveTo(worldA, 0.2f));
-            StartCoroutine(other.MoveTo(worldB, 0.2f));
+            // 매치 없으면 다시 원래 자리로 되돌리기
+            spawner.blockDict[a.gridPos] = b;
+            spawner.blockDict[b.gridPos] = a;
 
-            // 좌표 원복
-            this.gridPos = posA;
-            other.gridPos = posB;
-            spawner.blockDict[posA] = this;
-            spawner.blockDict[posB] = other;
+            Vector2Int oldA = b.gridPos;
+            Vector2Int oldB = a.gridPos;
+
+            a.gridPos = oldB;
+            b.gridPos = oldA;
+
+            yield return a.StartCoroutine(a.MoveTo(worldA, 0.2f));
+            yield return b.StartCoroutine(b.MoveTo(worldB, 0.2f));
         }
         else
         {
+            // 매치 있으면 프로세스 진행
             spawner.ProcessMatches(matches);
         }
     }
+
 
     private bool IsNeighbor(Vector2Int a, Vector2Int b)
     {
