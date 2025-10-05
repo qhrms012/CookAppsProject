@@ -10,9 +10,13 @@ public class JackBoxManager : MonoBehaviour
 
     [Header("JackBox")]
     public GameObject jackBoxPrefab;
+
+    public List<JackBox> jackBoxes = new List<JackBox>();
     private void Start()
     {
         SpawnJackBoxesFromTile();
+
+        jackBoxes = new List<JackBox>(FindObjectsByType<JackBox>(FindObjectsSortMode.None));
     }
     void SpawnJackBoxesFromTile()
     {
@@ -29,7 +33,8 @@ public class JackBoxManager : MonoBehaviour
 
                     Vector3 worldPos = jackBoxTilemap.GetCellCenterWorld(cellPos);
 
-                    Instantiate(jackBoxPrefab, worldPos, Quaternion.identity);
+                    GameObject go = Instantiate(jackBoxPrefab, worldPos, Quaternion.identity);
+                    jackBoxes.Add(go.GetComponent<JackBox>());
                     jackBoxTilemap.SetTile(cellPos, null);
 
                 }

@@ -15,6 +15,9 @@ public class HexBoardSpawner : MonoBehaviour
     [Header("Manager")]
     public MatchManager matchManager;
 
+    [Header("JackBox")]
+    public JackBoxManager jackBoxManager;
+
     public Dictionary<Vector2Int, Block> blockDict = new Dictionary<Vector2Int, Block>();
 
     public static readonly Vector3Int[] cubeDirs = new Vector3Int[]
@@ -44,11 +47,58 @@ public class HexBoardSpawner : MonoBehaviour
 
                 if (bgTilemap.HasTile(cellPos))
                 {
-                    Vector2Int offset = new Vector2Int(x, y);
-                    SpawnSingleBlock(offset);
+                    Vector2Int gridPos = new Vector2Int(x, y);
+
+                    // 매치 없는 블럭 뽑기
+                    Block prefab = GetSafeRandomBlock(gridPos);
+                    Vector3 worldPos = bgTilemap.GetCellCenterWorld(cellPos);
+
+                    Block b = Instantiate(prefab, worldPos, Quaternion.identity);
+                    b.Init(b.color, gridPos);
+                    b.spawner = this;
+
+                    blockDict[gridPos] = b;
                 }
             }
         }
+    }
+    private Block GetSafeRandomBlock(Vector2Int pos)
+    {
+        int tries = 0;
+        Block prefab;
+
+        do
+        {
+            prefab = blockPrefabs[Random.Range(0, blockPrefabs.Length)];
+            tries++;
+        }
+        while (WouldCauseMatch(prefab.color, pos) && tries < 20);
+
+        return prefab;
+    }
+    private bool WouldCauseMatch(Block.ColorType color, Vector2Int pos)
+    {
+        // 위치를 Cube 좌표로 변환
+        Vector3Int cubePos = OffsetToCube(pos);
+
+        foreach (var dir in cubeDirs) // →, ←, ↗, ↖, ↘, ↙
+        {
+            // 같은 방향으로 2칸 검사
+            Vector3Int n1 = cubePos + dir;
+            Vector3Int n2 = cubePos + dir * 2;
+
+            Vector2Int o1 = CubeToOffset(n1);
+            Vector2Int o2 = CubeToOffset(n2);
+
+            if (blockDict.TryGetValue(o1, out Block b1) &&
+                blockDict.TryGetValue(o2, out Block b2))
+            {
+                if (b1.color == color && b2.color == color)
+                    return true; // 3연속 매치 발생
+            }
+        }
+
+        return false;
     }
 
     public Block SpawnSingleBlock(Vector2Int offset)
@@ -88,14 +138,34 @@ public class HexBoardSpawner : MonoBehaviour
     public void ProcessMatches(List<List<Block>> matches)
     {
         
-
         // 제거
         matchManager.ClearMatches(matches, blockDict);
+
+        NotifyJackBoxNearby(matches);
 
         // 드랍 + 리필
         StartCoroutine(DropAndRefill());
     }
 
+    private void NotifyJackBoxNearby(List<List<Block>> matches)
+    {
+        foreach (var run in matches)
+        {
+            foreach (var b in run)
+            {
+                Vector3 blockPos = bgTilemap.GetCellCenterWorld(new Vector3Int(b.gridPos.x, b.gridPos.y, 0));
+
+                foreach (var jack in jackBoxManager.jackBoxes)
+                {
+                    float dist = Vector3.Distance(blockPos, jack.transform.position);
+                    if(dist < 1.1f)
+                    {
+                        jack.OnNearbyMatch();
+                    }
+                }
+            }
+        }
+    }
     private IEnumerator DropAndRefill()
     {
         yield return new WaitForSeconds(0.25f);
