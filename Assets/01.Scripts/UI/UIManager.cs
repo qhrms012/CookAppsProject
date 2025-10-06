@@ -1,18 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public TextMeshProUGUI clownCount;
+    public TextMeshProUGUI moveCount;
+
+    public RectTransform clownUI;
+    private void Start()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    public void MoveClownToGoal()
     {
-        
+        Vector3 GoalWorldPos = Camera.main.ScreenToWorldPoint(clownUI.position);
     }
+
 }
