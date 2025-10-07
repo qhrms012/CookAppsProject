@@ -11,6 +11,9 @@ public class JackBoxManager : MonoBehaviour
     [Header("JackBox")]
     public GameObject jackBoxPrefab;
 
+    [Header("Goal UI")]
+    [SerializeField] private RectTransform goalUI;
+
     public List<JackBox> jackBoxes = new List<JackBox>();
     private void Start()
     {
@@ -34,7 +37,9 @@ public class JackBoxManager : MonoBehaviour
                     Vector3 worldPos = jackBoxTilemap.GetCellCenterWorld(cellPos);
 
                     GameObject go = Instantiate(jackBoxPrefab, worldPos, Quaternion.identity);
-                    jackBoxes.Add(go.GetComponent<JackBox>());
+                    JackBox jack = go.GetComponent<JackBox>();
+                    jack.Initialize(goalUI);
+                    jackBoxes.Add(jack);
                     jackBoxTilemap.SetTile(cellPos, null);
 
                 }

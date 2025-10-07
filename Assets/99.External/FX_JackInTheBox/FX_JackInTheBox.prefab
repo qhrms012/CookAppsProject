@@ -1363,6 +1363,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84c7a14879afbd24aa33c7da1c89177f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MAX_CLOWN: 100
+  clown: {fileID: 4895686144000110}
+  goalUI: {fileID: 0}
 --- !u!1 &1730863978424388
 GameObject:
   m_ObjectHideFlags: 0

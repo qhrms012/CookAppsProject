@@ -14,9 +14,6 @@ public class UIManager : MonoBehaviour
         
     }
 
-    public void MoveClownToGoal()
-    {
-        Vector3 GoalWorldPos = Camera.main.ScreenToWorldPoint(clownUI.position);
-    }
+    
 
 }
