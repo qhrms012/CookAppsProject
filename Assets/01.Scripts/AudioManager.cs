@@ -18,7 +18,7 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField] private Slider m_MusicBGMSlider;
     [SerializeField] private Slider m_MusicSFXSlider;
 
-    public enum Sfx {Crash, BoxOpen, GameClear, GameOver}
+    public enum Sfx {Pop, BoxOpen, GameClear, GameOver}
     [Serializable] public struct SfxEntry { public Sfx key; public AudioClip[] clips; }
 
     AudioSource _bgm;
