@@ -137,7 +137,7 @@ public class HexBoardSpawner : MonoBehaviour
     // === 매치 → 제거 → 드랍/리필 ===
     public void ProcessMatches(List<List<Block>> matches)
     {
-        
+        AudioManager.Instance.PlaySfx(AudioManager.Sfx.Pop);
         // 제거
         matchManager.ClearMatches(matches, blockDict);
 

@@ -16,6 +16,7 @@ public class GameManager : Singleton<GameManager>
     private void Awake()
     {
         Time.timeScale = 1f;
+        AudioManager.Instance.PlayBgm(true);
     }
     private void Start()
     {
@@ -25,6 +26,7 @@ public class GameManager : Singleton<GameManager>
     public void PauseGame(bool isGamePause)
     {
         Time.timeScale = isGamePause ? 0f : 1f;
+        AudioManager.Instance.EffectBgm(isGamePause);
     }
     public void TriggerGameOver(bool isWin)
     {        

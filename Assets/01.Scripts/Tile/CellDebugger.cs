@@ -5,11 +5,11 @@ using UnityEngine.Tilemaps;
 
 public class CellDebugger : MonoBehaviour
 {
-    public Tilemap tilemap;   // Inspector에 연결
+    public Tilemap tilemap;
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // 마우스 왼쪽 클릭
+        if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int cellPos = tilemap.WorldToCell(mouseWorldPos);

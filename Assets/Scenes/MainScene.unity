@@ -4032,8 +4032,20 @@ MonoBehaviour:
   sfxGroup: {fileID: 7024717393738385007, guid: 2291f7b06c21487418ccdb2b73131d85, type: 2}
   bgmVolume: 1
   sfxVolume: 1
-  bgmClip: {fileID: 0}
-  sfxEntries: []
+  bgmClip: {fileID: 8300000, guid: dee9ab2317e831e489b10947faca2fc8, type: 3}
+  sfxEntries:
+  - key: 0
+    clips:
+    - {fileID: 8300000, guid: 36804b67563b35f479e641cfb7e9213a, type: 3}
+  - key: 1
+    clips:
+    - {fileID: 8300000, guid: f3250aa0b7c5fb448a883d4ea4861470, type: 3}
+  - key: 2
+    clips:
+    - {fileID: 8300000, guid: c88af132770ec164ca06750bfe79f80f, type: 3}
+  - key: 3
+    clips:
+    - {fileID: 8300000, guid: 26c63e0fa04dea54593f4d27dd2dbebe, type: 3}
   channels: 5
   m_AudioMixer: {fileID: 24100000, guid: 2291f7b06c21487418ccdb2b73131d85, type: 2}
   m_MusicMasterSlider: {fileID: 107034383}

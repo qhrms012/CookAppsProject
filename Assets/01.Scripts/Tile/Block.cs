@@ -95,11 +95,9 @@ public class Block : MonoBehaviour
 
         if (matches.Count == 0)
         {
-            // 매치가 없으면 원위치 복귀
             yield return StartCoroutine(this.MoveTo(worldA, 0.25f));
             yield return StartCoroutine(other.MoveTo(worldB, 0.25f));
 
-            // 딕셔너리와 좌표 원복
             spawner.blockDict[posA] = this;
             spawner.blockDict[posB] = other;
             this.gridPos = posA;

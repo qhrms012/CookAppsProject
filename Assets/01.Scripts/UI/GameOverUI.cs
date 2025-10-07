@@ -45,7 +45,8 @@ public class GameOverUI : MonoBehaviour
         gameObject.SetActive(true);
         gameOverText.text = isWin ? "성공" : "실패";
 
-        // 초기화
+        AudioManager.Instance.PlaySfx(isWin ? AudioManager.Sfx.GameClear : AudioManager.Sfx.GameOver);
+
         panelColor.a = 0f;
         panel.color = panelColor;
         rectTransform.anchoredPosition = startOffset;

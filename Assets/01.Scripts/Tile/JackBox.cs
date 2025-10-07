@@ -74,6 +74,7 @@ public class JackBox : MonoBehaviour
             if(!anim.enabled)
                 anim.enabled = true;
 
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BoxOpen);
             anim.SetTrigger("SpawnClown");
             StartCoroutine(MoveClownAfterAnim());
         }
