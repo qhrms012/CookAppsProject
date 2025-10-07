@@ -95,7 +95,6 @@ public class AudioManager : Singleton<AudioManager>
             a.Play();
             return;
         }
-        // 전부 바쁘면 가장 오래된 채널 덮어쓰기
         var force = _sfxPool[_cursor];
         force.pitch = pitch;
         force.clip = clips[UnityEngine.Random.Range(0, clips.Length)];
@@ -114,8 +113,7 @@ public class AudioManager : Singleton<AudioManager>
 
     public void SetMasterVolume(float volume)
     {
-        // Master 볼륨은 BGM 및 SFX 모두에 영향을 미치는 AudioMixer 파라미터로 설정
         float adjustedVolume = Mathf.Log10(Mathf.Clamp(volume, 0.0001f, 1f)) * 20;
-        m_AudioMixer.SetFloat("Master", adjustedVolume);  // "Master"는 AudioMixer에 설정된 파라미터 이름
+        m_AudioMixer.SetFloat("Master", adjustedVolume);
     }
 }

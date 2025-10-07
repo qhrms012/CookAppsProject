@@ -20,14 +20,13 @@ public class MatchManager : MonoBehaviour
 
             Vector3Int cubePos = spawner.OffsetToCube(block.gridPos);
 
-            for (int d = 0; d < 3; d++) // 3쌍(정방향/역방향)
+            for (int d = 0; d < 3; d++)
             {
                 Vector3Int dir = HexBoardSpawner.cubeDirs[d];
                 Vector3Int opp = HexBoardSpawner.cubeDirs[d + 3];
 
                 List<Block> run = new List<Block> { block };
 
-                // 정방향
                 Vector3Int cur = cubePos;
                 while (true)
                 {

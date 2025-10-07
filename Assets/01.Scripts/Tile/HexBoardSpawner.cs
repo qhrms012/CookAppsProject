@@ -49,7 +49,6 @@ public class HexBoardSpawner : MonoBehaviour
                 {
                     Vector2Int gridPos = new Vector2Int(x, y);
 
-                    // 매치 없는 블럭 뽑기
                     Block prefab = GetSafeRandomBlock(gridPos);
                     Vector3 worldPos = bgTilemap.GetCellCenterWorld(cellPos);
 
@@ -78,12 +77,10 @@ public class HexBoardSpawner : MonoBehaviour
     }
     private bool WouldCauseMatch(Block.ColorType color, Vector2Int pos)
     {
-        // 위치를 Cube 좌표로 변환
         Vector3Int cubePos = OffsetToCube(pos);
 
-        foreach (var dir in cubeDirs) // →, ←, ↗, ↖, ↘, ↙
+        foreach (var dir in cubeDirs)
         {
-            // 같은 방향으로 2칸 검사
             Vector3Int n1 = cubePos + dir;
             Vector3Int n2 = cubePos + dir * 2;
 
@@ -94,7 +91,7 @@ public class HexBoardSpawner : MonoBehaviour
                 blockDict.TryGetValue(o2, out Block b2))
             {
                 if (b1.color == color && b2.color == color)
-                    return true; // 3연속 매치 발생
+                    return true;
             }
         }
 
@@ -114,13 +111,12 @@ public class HexBoardSpawner : MonoBehaviour
         return block;
     }
 
-    // === 좌표 변환 ===
     public Vector3Int OffsetToCube(Vector2Int offset)
     {
         int col = offset.x;
         int row = offset.y;
 
-        int x = col - (row - (row & 1)) / 2; // Odd-R 보정
+        int x = col - (row - (row & 1)) / 2;
         int z = row;
         int y = -x - z;
 
@@ -134,16 +130,15 @@ public class HexBoardSpawner : MonoBehaviour
         return new Vector2Int(col, row);
     }
 
-    // === 매치 → 제거 → 드랍/리필 ===
+
     public void ProcessMatches(List<List<Block>> matches)
     {
         AudioManager.Instance.PlaySfx(AudioManager.Sfx.Pop);
-        // 제거
+
         matchManager.ClearMatches(matches, blockDict);
 
         NotifyJackBoxNearby(matches);
 
-        // 드랍 + 리필
         StartCoroutine(DropAndRefill());
     }
 
@@ -172,7 +167,6 @@ public class HexBoardSpawner : MonoBehaviour
 
         BoundsInt bounds = bgTilemap.cellBounds;
 
-        // y 기준으로 위에서 아래로 탐색 (열 단위)
         for (int y = bounds.yMin; y < bounds.yMax; y++)
         {
             for (int x = bounds.xMin; x < bounds.xMax; x++)
@@ -180,7 +174,6 @@ public class HexBoardSpawner : MonoBehaviour
                 Vector2Int pos = new Vector2Int(x, y);
                 if (bgTilemap.HasTile(new Vector3Int(x, y, 0)) && !blockDict.ContainsKey(pos))
                 {
-                    // 위쪽에서 블럭 찾기
                     for (int nx = x + 1; nx < bounds.xMax; nx++)
                     {
                         Vector2Int abovePos = new Vector2Int(nx, y);
@@ -198,10 +191,8 @@ public class HexBoardSpawner : MonoBehaviour
                         }
                     }
 
-                    // 위에서 아무것도 못 찾으면 새 블럭 생성
                     if (!blockDict.ContainsKey(pos))
                     {
-                        // 보드의 오른쪽 바깥(xMax+1)에 임시 스폰
                         Vector3Int spawnCell = new Vector3Int(bounds.xMax + 1, y, 0);
                         Vector3 spawnWorld = bgTilemap.GetCellCenterWorld(spawnCell);
 
@@ -212,7 +203,6 @@ public class HexBoardSpawner : MonoBehaviour
 
                         blockDict[pos] = newBlock;
 
-                        // 최종 위치까지 애니메이션 이동
                         Vector3 targetWorld = bgTilemap.GetCellCenterWorld(new Vector3Int(pos.x, pos.y, 0));
                         StartCoroutine(newBlock.MoveTo(targetWorld, 0.25f));
                     }
@@ -223,7 +213,6 @@ public class HexBoardSpawner : MonoBehaviour
 
         yield return new WaitForSeconds(0.3f);
 
-        // 드랍 후 다시 매치 검사 (연쇄 처리)
         var newMatches = matchManager.FindMatches(blockDict);
         if (newMatches.Count > 0)
             ProcessMatches(newMatches);

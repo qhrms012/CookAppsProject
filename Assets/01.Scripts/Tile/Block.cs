@@ -58,7 +58,6 @@ public class Block : MonoBehaviour
         Vector3Int cell = spawner.bgTilemap.WorldToCell(mouseWorld);
         Vector2Int dropPos = new Vector2Int(cell.x, cell.y);
 
-        // 이웃 검사 후 스왑 시도
         if (dropPos != gridPos &&
             spawner.blockDict.ContainsKey(dropPos) &&
             IsNeighbor(gridPos, dropPos))
