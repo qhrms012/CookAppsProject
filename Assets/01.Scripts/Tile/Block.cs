@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-
 public class Block : MonoBehaviour
 {
     public enum ColorType { Red, Orange, Green, Yellow, Purple, Pink }
@@ -18,6 +17,9 @@ public class Block : MonoBehaviour
     public HexBoardSpawner spawner;
 
     public static event Action OnBlockSwapped;
+
+    private bool isMoving = false;
+
     private void OnEnable()
     {
         spawner = FindAnyObjectByType<HexBoardSpawner>();
@@ -30,7 +32,9 @@ public class Block : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (isMoving) return;
         originalPos = transform.position;
+
         Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0;
         dragOffset = transform.position - mouseWorld;
@@ -38,6 +42,8 @@ public class Block : MonoBehaviour
 
     private void OnMouseDrag()
     {
+        if (isMoving) return;
+
         Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0;
         transform.position = mouseWorld + dragOffset;
@@ -45,6 +51,8 @@ public class Block : MonoBehaviour
 
     private void OnMouseUp()
     {
+        if (isMoving) return;
+
         Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0;
         Vector3Int cell = spawner.bgTilemap.WorldToCell(mouseWorld);
@@ -56,7 +64,7 @@ public class Block : MonoBehaviour
             IsNeighbor(gridPos, dropPos))
         {
             Block other = spawner.blockDict[dropPos];
-            TrySwap(other);
+            StartCoroutine(SwapAndCheck(other));
         }
         else
         {
@@ -64,56 +72,47 @@ public class Block : MonoBehaviour
         }
     }
 
-    private void TrySwap(Block other)
+    private IEnumerator SwapAndCheck(Block other)
     {
+        if (isMoving) yield break;
+        isMoving = true;
+
         Vector2Int posA = this.gridPos;
         Vector2Int posB = other.gridPos;
 
-        // 딕셔너리 먼저 갱신 (위치 확정)
-        spawner.blockDict[posA] = other;
-        spawner.blockDict[posB] = this;
-
-        this.gridPos = posB;
-        other.gridPos = posA;
-
-        // 자리 교환 연출
         Vector3 worldA = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posA.x, posA.y, 0));
         Vector3 worldB = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posB.x, posB.y, 0));
 
-        OnBlockSwapped?.Invoke();
-        StartCoroutine(SwapAndCheck(this, other, worldA, worldB));
-    }
+        yield return StartCoroutine(this.MoveTo(worldB, 0.25f));
+        yield return StartCoroutine(other.MoveTo(worldA, 0.25f));
 
-    private IEnumerator SwapAndCheck(Block a, Block b, Vector3 worldA, Vector3 worldB)
-    {
-        // 애니메이션 완료 대기
-        yield return a.StartCoroutine(a.MoveTo(worldB, 0.2f));
-        yield return b.StartCoroutine(b.MoveTo(worldA, 0.2f));
+        spawner.blockDict[posA] = other;
+        spawner.blockDict[posB] = this;
+        this.gridPos = posB;
+        other.gridPos = posA;
 
         var matches = spawner.matchManager.FindMatches(spawner.blockDict);
 
         if (matches.Count == 0)
         {
-            // 매치 없으면 다시 원래 자리로 되돌리기
-            spawner.blockDict[a.gridPos] = b;
-            spawner.blockDict[b.gridPos] = a;
+            // 매치가 없으면 원위치 복귀
+            yield return StartCoroutine(this.MoveTo(worldA, 0.25f));
+            yield return StartCoroutine(other.MoveTo(worldB, 0.25f));
 
-            Vector2Int oldA = b.gridPos;
-            Vector2Int oldB = a.gridPos;
-
-            a.gridPos = oldB;
-            b.gridPos = oldA;
-
-            yield return a.StartCoroutine(a.MoveTo(worldA, 0.2f));
-            yield return b.StartCoroutine(b.MoveTo(worldB, 0.2f));
+            // 딕셔너리와 좌표 원복
+            spawner.blockDict[posA] = this;
+            spawner.blockDict[posB] = other;
+            this.gridPos = posA;
+            other.gridPos = posB;
         }
         else
         {
-            // 매치 있으면 프로세스 진행
             spawner.ProcessMatches(matches);
         }
-    }
 
+        isMoving = false;
+        OnBlockSwapped?.Invoke();
+    }
 
     private bool IsNeighbor(Vector2Int a, Vector2Int b)
     {
@@ -149,3 +148,4 @@ public class Block : MonoBehaviour
         transform.position = targetPos;
     }
 }
+

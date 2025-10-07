@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -11,7 +12,10 @@ public class GameManager : Singleton<GameManager>
     public static event Action<bool> onGameOver;
     public bool isGameOver = false;
 
-
+    private void Awake()
+    {
+        Time.timeScale = 1f;
+    }
     private void Start()
     {
         
@@ -21,6 +25,10 @@ public class GameManager : Singleton<GameManager>
     public void TriggerGameOver(bool isWin)
     {        
         onGameOver?.Invoke(isWin);
-        Time.timeScale = 0;
+    }
+
+    public void GameReStart()
+    {
+        SceneManager.LoadScene("MainScene");
     }
 }

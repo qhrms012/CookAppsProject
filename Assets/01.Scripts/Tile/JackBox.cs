@@ -77,9 +77,5 @@ public class JackBox : MonoBehaviour
             anim.SetTrigger("SpawnClown");
             StartCoroutine(MoveClownAfterAnim());
         }
-        else
-        {
-            GameManager.Instance.TriggerGameOver(true);
-        }
     }
 }
