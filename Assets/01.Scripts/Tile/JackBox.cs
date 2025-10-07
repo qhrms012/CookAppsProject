@@ -7,17 +7,20 @@ public class JackBox : MonoBehaviour
 {
     private Animator anim;
     private int clownCount = 0;
-    public int MAX_CLOWN = 100;
+    public int MAX_CLOWN = 10;
+    private int totalClownCount = 0;
     public Transform clown;
     private RectTransform goalUI;
 
+
     public GameObject clownTarget;
+
+    public static event Action<int> onClownSpawned;
 
     private void Awake()
     {
         anim = GetComponent<Animator>();
     }
-
     public void Initialize(RectTransform ui)
     {
         goalUI = ui;
@@ -61,16 +64,22 @@ public class JackBox : MonoBehaviour
     }
     public void OnNearbyMatch()
     {
-        if(clownCount < MAX_CLOWN)
+        clownCount = 0;
+        if(totalClownCount < MAX_CLOWN)
         {
             clownCount++;
+            totalClownCount += clownCount;
+            onClownSpawned?.Invoke(clownCount);
 
             if(!anim.enabled)
                 anim.enabled = true;
 
-            anim.ResetTrigger("SpawnClown");
             anim.SetTrigger("SpawnClown");
             StartCoroutine(MoveClownAfterAnim());
+        }
+        else
+        {
+            GameManager.Instance.TriggerGameOver(true);
         }
     }
 }

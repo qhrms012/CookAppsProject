@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,6 +17,7 @@ public class Block : MonoBehaviour
 
     public HexBoardSpawner spawner;
 
+    public static event Action OnBlockSwapped;
     private void OnEnable()
     {
         spawner = FindAnyObjectByType<HexBoardSpawner>();
@@ -77,6 +79,8 @@ public class Block : MonoBehaviour
         // 자리 교환 연출
         Vector3 worldA = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posA.x, posA.y, 0));
         Vector3 worldB = spawner.bgTilemap.GetCellCenterWorld(new Vector3Int(posB.x, posB.y, 0));
+
+        OnBlockSwapped?.Invoke();
         StartCoroutine(SwapAndCheck(this, other, worldA, worldB));
     }
 
