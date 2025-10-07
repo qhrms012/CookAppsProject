@@ -11,6 +11,7 @@ public class GameManager : Singleton<GameManager>
 
     public static event Action<bool> onGameOver;
     public bool isGameOver = false;
+    private bool isGamePause = false;
 
     private void Awake()
     {
@@ -21,7 +22,10 @@ public class GameManager : Singleton<GameManager>
         
     }
 
-
+    public void PauseGame(bool isGamePause)
+    {
+        Time.timeScale = isGamePause ? 0f : 1f;
+    }
     public void TriggerGameOver(bool isWin)
     {        
         onGameOver?.Invoke(isWin);
