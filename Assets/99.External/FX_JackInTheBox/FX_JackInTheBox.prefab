@@ -1365,7 +1365,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MAX_CLOWN: 100
   clown: {fileID: 4895686144000110}
-  goalUI: {fileID: 0}
+  clownTarget: {fileID: 1848009808224846}
 --- !u!1 &1730863978424388
 GameObject:
   m_ObjectHideFlags: 0

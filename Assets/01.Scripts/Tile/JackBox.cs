@@ -6,16 +6,15 @@ using UnityEngine;
 public class JackBox : MonoBehaviour
 {
     private Animator anim;
-    private Camera mainCam;
     private int clownCount = 0;
     public int MAX_CLOWN = 100;
-
     public Transform clown;
     private RectTransform goalUI;
 
+    public GameObject clownTarget;
+
     private void Awake()
     {
-        mainCam = Camera.main;
         anim = GetComponent<Animator>();
     }
 
@@ -25,10 +24,20 @@ public class JackBox : MonoBehaviour
     }
     public void MoveClownToGoal()
     {
-        Vector3 goalWorldPos = Camera.main.ScreenToWorldPoint(goalUI.position);
+        Vector3 screenPos = goalUI.position;
+        Vector3 goalWorldPos = Camera.main.ScreenToWorldPoint(screenPos);
         goalWorldPos.z = 0;
 
-        StartCoroutine(MoveClown(clown, goalWorldPos, 1f));
+        StartCoroutine(MoveClown(clown, goalWorldPos, 2f));
+    }
+
+    IEnumerator MoveClownAfterAnim()
+    {
+        yield return new WaitForSeconds(anim.GetCurrentAnimatorStateInfo(0).length);
+
+        anim.enabled = false;
+
+        MoveClownToGoal();
     }
     IEnumerator MoveClown(Transform target, Vector3 goal, float time)
     {
@@ -39,6 +48,13 @@ public class JackBox : MonoBehaviour
         {
             t += Time.deltaTime / time;
             target.position = Vector3.Lerp(start, goal, t);
+            
+            if(t >= 1 - (0.4f / time))
+            {
+                clownTarget.SetActive(false);
+            }
+
+
             yield return null;
         }
         target.position = goal;
@@ -48,7 +64,13 @@ public class JackBox : MonoBehaviour
         if(clownCount < MAX_CLOWN)
         {
             clownCount++;
+
+            if(!anim.enabled)
+                anim.enabled = true;
+
+            anim.ResetTrigger("SpawnClown");
             anim.SetTrigger("SpawnClown");
+            StartCoroutine(MoveClownAfterAnim());
         }
     }
 }
