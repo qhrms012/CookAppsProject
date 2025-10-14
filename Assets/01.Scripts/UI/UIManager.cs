@@ -30,11 +30,15 @@ public class UIManager : Singleton<UIManager>
 
     private void UpdateClownCount(int value)
     {
-        
-        currentClownCount -= value;
-        if(currentClownCount <= 0)
+        if (currentClownCount - value <= 0) 
+        {
+            currentClownCount = 0;
             GameManager.Instance.TriggerGameOver(true);
-
+        }
+        else
+        {
+            currentClownCount -= value;
+        }                               
         clownCount.text = currentClownCount.ToString();
     }
 
